@@ -1,17 +1,19 @@
 import Exceptions.AlreadyExistsException;
 import Exceptions.NotFoundexception;
 
+import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AddressBook {
+public class AddressBook implements PlannerI {
 
     private Map<String, Contact> contacts = new TreeMap<>();
     private Set<String> groups = new TreeSet<>();
     private Map<String, Set<String>> contactsByGroup = new TreeMap<>();
     private List<Contact> history = new ArrayList<>();
-    private  final PlannerI plannerI;
+    private  PlannerI plannerI;
 
+    public AddressBook(){}
 
     public AddressBook(PlannerI plannerI)
     {
@@ -26,7 +28,7 @@ public class AddressBook {
      * */
     public  Contact  addContact(Contact contact){
         if(contacts.containsKey(contact.getName())){
-            throw new AlreadyExistsException("El contacto ya existe");
+            throw new AlreadyExistsException("Ya existe un contacto con nombre: " + contact.getName());
         }
         contacts.put(contact.getName(),contact);
         history.add(contact);
@@ -46,12 +48,11 @@ public class AddressBook {
      * */
     public boolean delete(String name){
         Contact contactRemoved = contacts.remove(name);
-        if(contactRemoved == null){
-            System.out.println("Contacto no encontrado");
-            return  false;
-        }
+        if(contactRemoved == null) return  false;
         history.remove(contactRemoved);
-        System.out.println("Contacto eliminado" + contactRemoved);
+        for (Set<String> members : contactsByGroup.values()) {
+            members.remove(name);
+        }
         return true;
     }
 
@@ -60,7 +61,8 @@ public class AddressBook {
      * muestra todos los contactos ordenando en orden alfabetico
      * */
 
-    List<Contact> listContacts(){
+   public List<Contact> listContacts(){
+
        return  new ArrayList<>(contacts.values());
     }
 
@@ -68,7 +70,7 @@ public class AddressBook {
      * Metodo para listar el historial
      * */
 
-    List<Contact> listHistory(){
+    public List<Contact> listHistory(){
         return  new ArrayList<>(history);
     }
 
@@ -77,11 +79,12 @@ public class AddressBook {
      * @param  nameGroup
      * */
 
-    void addGroup(String nameGroup){
+    public String addGroup(String nameGroup){
         if(!groups.add(nameGroup)){
-            throw new AlreadyExistsException("El grupo " + nameGroup + "Ya exist3e");
+            throw new AlreadyExistsException("El grupo " + nameGroup + "Ya existe");
         }
         contactsByGroup.put(nameGroup, new TreeSet<>());
+        return  nameGroup;
     }
 
     /**
@@ -90,16 +93,16 @@ public class AddressBook {
      * @param  groupName
      * */
 
-    public void addContactToGroup(String contactName, String groupName)
+    public String addContactToGroup(String contactName, String groupName)
     {
         if(!contacts.containsKey(contactName)){
-            throw new NotFoundexception("El contacto no exist3e" + contactName);
+            throw new NotFoundexception("El contacto: " + contactName + " No existe");
         }
         if(!groups.contains(groupName)){
-            throw new NotFoundexception("El grupo no existe");
+            throw new NotFoundexception("El grupo : " + groupName + " No existe");
         }
         contactsByGroup.get(groupName).add(contactName);
-
+        return  groupName;
     }
 
     /**
@@ -113,9 +116,8 @@ public class AddressBook {
      * Mostrar contactos por nombre de grupo
      * @param groupName
      * */
-    List<Contact> contactsByGroupName(String groupName)
+    public List<Contact> contactsByGroupName(String groupName)
     {
-        List<Contact> result = new ArrayList<>();
         if(!groups.contains(groupName)){
             throw new NotFoundexception("Al parecer el grupo no existe");
         }
@@ -124,10 +126,5 @@ public class AddressBook {
                 .collect(Collectors.toList());
 
     }
-
-
-
-
-
 
 }

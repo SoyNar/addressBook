@@ -2,14 +2,14 @@ import java.util.List;
 
 public interface PlannerI {
 
-    Contact add(Contact contact);
+    Contact addContact(Contact contact);
     Contact find(String name);
     boolean delete(String name);
-    List<Contact> all();
-    List<Contact> getHistory();
-    void addGroup(String groupName);
-    void addContactToGroup(String contactName, String groupName);
-    List<String> getSortedGroups();
-    List<Contact> getContactsByGroup(String groupName);
+    List<Contact> listContacts();
+    List<Contact> listHistory();
+    String addGroup(String groupName);
+    String addContactToGroup(String contactName, String groupName);
+    List<String> listGroups();
+    List<Contact> contactsByGroupName(String groupName);
 
 }

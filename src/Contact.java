@@ -48,4 +48,9 @@ public class Contact {
             return new Contact(this);
         }
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s | Telefono: %s | Email: %s", name, phone, email);
+    }
 }
